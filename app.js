@@ -68,7 +68,7 @@ document.querySelectorAll("[data-place]").forEach(b=>b.onclick=()=>placeDetails(
 }
 function placeDetails(p){
 if(!p)return;
-modal(p.name,`<div class="info-box">${safe(p.description||p.tag)}</div><div class="warn-box">${p.type==="gate"?"موقع دبوس الباب تقريبي، وليس مدخلاً موثقاً.":p.indoor?"لا تُستخدم الملاحة الخارجية لتحديد الممرات والطوابق داخل الحرم.":"مسارات المشي تجريبية وقد تتغير بسبب التنظيم."}</div><div class="button-line"><button id="placeOfficial" class="quiet-btn">الخريطة الرسمية</button><button id="placeGoogle" class="quiet-btn">فتح خرائط Google</button>${p.indoor?"":'<button id="placeWalk" class="primary-btn">اعرض مسار المشي</button>'}</div>`);
+modal(p.name,`<div class="info-box">${safe(p.description||p.tag)}</div><div class="warn-box">${p.type==="gate"?"موقع دبوس الباب تقريبي، وليس مدخلاً موثقاً.":p.indoor?"لا تُستخدم الملاحة الخارجية لتحديد الممرات والطوابق داخل الحرم.":"مسارات المشي تجريبية وقد تتغير بسبب التنظيم."}</div><div class="button-line"><button id="placeOfficial" class="quiet-btn">الخريطة الرسمية</button><button id="placeGoogle" class="quiet-btn">فتح خرائط Google</button>${p.indoor||p.type==="gate"?"":'<button id="placeWalk" class="primary-btn">اعرض مسار المشي</button>'}</div>`);
 $("placeOfficial").onclick=()=>open(OFFICIAL);$("placeGoogle").onclick=()=>open(google(p));
 if($("placeWalk"))$("placeWalk").onclick=()=>{close();startRoute(p);};
 }
