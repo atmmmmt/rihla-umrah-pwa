@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#103b36" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="description" content="رِحال: مساعد العمرة للتنقل بين مكة والمدينة، العودة للفندق، والتوجيه إلى الخرائط الرسمية للحرمين." />
+  <title>رِحال | دليل عمـرتك</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+  <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo7dQvE6+NQ9w=" crossorigin="" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <header class="brand-header">
+        <div class="brand">
+          <span class="brand-symbol" aria-hidden="true">◈</span>
+          <div><strong>رِحال</strong><small>رفيق رحلتك المباركة</small></div>
+        </div>
+        <div class="year-pill"><span class="status-dot"></span> دليل ٢٠٢٦</div>
+      </header>
+
+      <section class="welcome-block">
+        <div class="welcome-eyebrow">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ</div>
+        <h1>وين ما كنت،<br><em>دربك واضح.</em></h1>
+        <p>خريطة رحلتك، فندقك، وأقرب معالم الحرمين، بمكان واحد.</p>
+      </section>
+
+      <div class="city-switch" role="group" aria-label="اختر المدينة">
+        <button id="makkahBtn" class="city active" type="button" aria-pressed="true"><span>🕋</span> مكة المكرمة</button>
+        <button id="madinahBtn" class="city" type="button" aria-pressed="false"><span>🕌</span> المدينة المنورة</button>
+      </div>
+
+      <div class="sidebar-scroll">
+        <section class="emergency-card">
+          <div class="emergency-top"><span class="emergency-icon">⌖</span><div><strong>ضعت عن المجموعة؟</strong><small>مساعدة سريعة خلال لحظات</small></div></div>
+          <div class="emergency-actions">
+            <button class="primary-btn" id="lostBtn" type="button">📍 أنا ضايع — شارك موقعي</button>
+            <button class="quiet-btn" id="hotelRouteBtn" type="button">↗ رجّعني للفندق</button>
+          </div>
+        </section>
+
+        <div class="section-head"><h2>وجهاتك السريعة</h2><button class="text-action" id="settingsBtn" type="button">⚙ إعدادات الرحلة</button></div>
+        <div id="quickDestinations" class="quick-destinations"></div>
+
+        <div class="section-head section-head-list"><h2>اكتشف الأماكن والأبواب</h2><span id="placeCount" class="count"></span></div>
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="searchBox" aria-label="ابحث عن باب أو مكان" type="search" placeholder="ابحث عن باب، رقم، أو معلم..." autocomplete="off" /></div>
+        <div class="filter-row" id="filters">
+          <button class="chip active" type="button" data-filter="all">الكل</button>
+          <button class="chip" type="button" data-filter="gate">الأبواب</button>
+          <button class="chip" type="button" data-filter="landmark">المعالم</button>
+          <button class="chip" type="button" data-filter="hotel">الفنادق</button>
+        </div>
+        <div class="places-list" id="placesList"></div>
+      </div>
+      <footer class="side-footer"><span>صُنع للمساعدة، وليس بديلاً عن تعليمات العاملين بالحرمين.</span><span>© RIHLA · نسخة أولية</span></footer>
+    </aside>
+
+    <main class="main-content">
+      <div class="map-topbar">
+        <div class="map-context"><span class="context-icon" id="citySymbol">🕋</span><div><strong id="mapTitle">المسجد الحرام ومحيطه</strong><small id="mapSubtitle">مكة المكرمة، المملكة العربية السعودية</small></div></div>
+        <div class="map-actions"><span class="live-indicator" id="gpsStatus"><span class="gps-led"></span> GPS غير نشط</span><button id="locationBtn" class="outline-btn" type="button" title="فعّل تحديد الموقع">⌾ <span>موقعي</span></button><button id="officialBtn" class="outline-btn official-btn" type="button">◫ <span>الخريطة الرسمية</span></button></div>
+      </div>
+
+      <div class="map-stage">
+        <div id="map" role="application" aria-label="خريطة الشوارع التفاعلية"></div>
+        <div class="map-fallback" id="mapFallback" hidden><div class="fallback-circle">◈</div><strong>خريطة الشوارع تحتاج اتصالًا بالإنترنت</strong><p>تقدر تستخدم الأدلة والعناوين المحفوظة، وتفتح الخريطة الرسمية عند توفر الإنترنت.</p><button class="primary-btn" id="retryMapBtn">إعادة تحميل الخريطة</button></div>
+        <div class="map-floating-top"><div class="note-pill"><span class="note-dot"></span> <span id="mapNotice">للتوجيه الخارجي فقط — داخل الحرم افتح الخريطة الرسمية</span></div></div>
+        <div class="map-tools"><button id="recenterBtn" title="توسيط الخريطة على موقعي" aria-label="توسيط الخريطة على موقعي">⌖</button><button id="plusBtn" title="تكبير الخريطة" aria-label="تكبير">＋</button><button id="minusBtn" title="تصغير الخريطة" aria-label="تصغير">−</button></div>
+        <div id="routePanel" class="route-panel" hidden>
+          <div class="route-panel-top"><span class="route-badge">توجيه مشي خارجي</span><button id="closeRouteBtn" class="icon-close" aria-label="إغلاق المسار">×</button></div>
+          <div class="next-turn" id="nextTurnBox" hidden aria-live="polite">
+            <span class="next-turn-arrow" id="nextTurnArrow" aria-hidden="true">↑</span>
+            <div class="next-turn-text"><small>الإرشاد القادم · للمشي خارج الحرم</small><strong id="nextTurnText">تابع السير</strong><span id="nextTurnDistance">—</span></div>
+          </div>
+          <strong id="routeTitle">المسار إلى الفندق</strong>
+          <p id="routeDescription">انقر لبدء توجيه المشي.</p>
+          <div class="route-stats"><span id="routeDistance">—</span><span id="routeDuration">—</span></div>
+          <div class="route-buttons"><button id="googleDirectionsBtn" class="primary-btn">↗ خرائط Google</button><button id="shareDestinationBtn" class="quiet-btn">مشاركة الوجهة</button></div>
+          <p class="navigation-caution">التوجيه التجريبي لا يعرف الطوابق أو الازدحام أو إغلاق الممرات. لا تعتمد عليه داخل الحرمين.</p>
+        </div>
+        <div class="map-bottom-hint">🟢 موقعك يظهر بعد السماح بالوصول · اضغط مطولًا على الخريطة لحفظ نقطة لقاء</div>
+      </div>
+      <div class="map-footer"><span>© OpenStreetMap contributors · مسارات خارجية تجريبية</span><span id="networkStatus">● متصل بالإنترنت</span></div>
+    </main>
+  </div>
+
+  <nav class="mobile-tabs" aria-label="القائمة الرئيسية"><button id="mobileMap" class="active">⌖<span>الخريطة</span></button><button id="mobilePlaces">▤<span>الأماكن</span></button><button id="mobileHelp">✦<span>المساعدة</span></button><button id="mobileTrip">⚙<span>رحلتي</span></button></nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modalOverlay" class="modal-overlay" hidden><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><header class="modal-header"><div><small>رِحال • مساعدة العمرة</small><h2 id="modalTitle">تفاصيل</h2></div><button class="icon-close" id="modalCloseBtn" aria-label="إغلاق النافذة">×</button></header><div id="modalBody" class="modal-body"></div></div></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
