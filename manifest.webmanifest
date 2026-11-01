@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "رِحال | مساعد العمرة",
+  "short_name": "رِحال",
+  "description": "دليل مكة والمدينة مع خرائط تفاعلية ومشاركة الموقع والعودة للفندق",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#103b36",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
